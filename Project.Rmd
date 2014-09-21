@@ -1,0 +1,119 @@
+---
+title: "Machine Learning Prediction Project"
+author: "Alejandro Morales Gallardo"
+date: "September 19, 2014"
+output: html_document
+---
+# Summary
+For this project, data of 6 participants performing exercises in 6 different ways was provided [1]. The six participants performed barbell lifts correctly and incorrectly in 5 different ways, classified as: A, B, C, D, E. The goal of the project is to correctly predict what kind of activity it is being realized as described by the *classe* variable. Here, after initial preprocessing, discarding missing values, the training dataset was partitioned into a training and testing dataset. This training dataset was centered and scaled and principal component analysis was performed. Then a random forest approach was chosen and applied to the training dataset. With an estimated error rate of $2.6$%. This was cross-validated with the test set where we obtain an error rate of $2.4$%.
+
+# Analysis
+
+```{r,message=FALSE, warning=FALSE}
+library(caret); library(randomForest)
+```
+
+
+```{r}
+trainData <- read.csv("../pml-training.csv",na.strings=c("","NA"))
+testData <- read.csv("../pml-testing.csv")
+```
+
+
+## Pre-processing
+
+The dimensions of the training data are
+```{r,echo=FALSE}
+dim(trainData)
+```
+
+Since the number of variables is considerably large, preprocessing of the original training data is needed in order to simplify our analysis and possibly speed up any prediction algorithm to be used. After a brief exploratory data analysis, we find that as many as $100$ variables have well over $97$% of missing values and we readily discard those variables as predictors,
+
+```{r}
+na.ind <-as.vector(which(colSums(is.na(trainData))>10000,arr.ind=T))
+length(na.ind)
+```
+
+
+As an example, I show a summary of the variable *max_roll_belt*.
+```{r}
+summary(trainData[,18])
+```
+
+Furthermore, it seems plausible that the name of the participants and the time variables are not needed for the analysis. The window variables (*new_window*,*num_window*) appear not to be relevant to our analysis as well. We therefore discard the first 7 variables, namely,
+
+```{r}
+other.ind <- 1:7
+names(trainData)[1:7]
+```
+
+After the initial pre-processing we are left with a training data set containing 53 variables.
+
+```{r}
+#preprocessed datasets with reduced variables
+exclude.ind <- c(other.ind,na.ind); exclude.ind<- exclude.ind[order(exclude.ind)]
+training2 <- trainData[,-exclude.ind]
+testing2 <- testData[,-exclude.ind]
+```
+
+## Data Partition
+We split the training dataset (denoted by the variable trainData) into a training and testing datasets using the *createDataPartition* function from the caret package. We split the data, assigning 70% of the trainData observations in the training set to be used in our analysis and assign the reminder 30% to the testing set as our cross-validation dataset. 
+For reproducibility purposes, we set a seed number.
+
+```{r}
+# set seed
+set.seed(3232)
+# Partition training set into training/testing
+inTrain <- createDataPartition(y = training2$classe, p = .7, list = FALSE)
+training <- training2[inTrain,]
+testing <- training2[-inTrain,]
+```
+
+## Further pre-processing
+
+Many of the variables are not normal and are rather skewed as we can confirm in the following histogram,
+```{r,echo=FALSE,fig.height=5,fig.width=5}
+hist(training$yaw_belt,xlab="yaw_belt",main=NULL)
+```
+
+We therefore preform further preprocessing of the data using the caret package. The data is standardized and also principal component analysis is done to further reduce the number of predictors and retain only the most useful variables as predictors. PCA leaves only 25 principal components that capture 95% of the variability.
+
+```{r}
+preObj <- preProcess(training[,-53],method=c("center","scale","pca"))
+```
+
+The preprocessed object is then feed into the train function to obtain our model
+```{r}
+trainPC <- predict(preObj,training[,-53])
+#modelFit <- train(training$classe~., data=trainPC, method="rf")
+```
+
+
+As we can see, our final Model using random forest looks like,
+```{r}
+modelFit$finalModel
+```
+
+We then apply the preprocessed of the training set to the testing set,
+```{r}
+#predicting new values with random forest
+testPC <- predict(preObj,testing[,-53])
+#confusion<-confusionMatrix(testing$classe,predict(modelFit,testPC))
+conf
+```
+
+### Out-of-sample error
+The estimated out-of-sample error estimated by the random forest algorithm is
+```{r}
+#rf estimated error
+```
+
+
+In general cross-validation is not needed as random forest is a bootstrapping method with multiple samples
+
+```{r}
+conf$overall[1][1]
+```
+
+# References
+[1] Velloso, E.; Bulling, A.; Gellersen, H.; Ugulino, W.; Fuks, H. Qualitative Activity Recognition of Weight Lifting Exercises. Proceedings of 4th International Conference in Cooperation with SIGCHI (Augmented Human '13) . Stuttgart, Germany: ACM SIGCHI, 2013.
