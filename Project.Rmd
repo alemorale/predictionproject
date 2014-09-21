@@ -94,26 +94,28 @@ As we can see, our final Model using random forest looks like,
 modelFit$finalModel
 ```
 
-We then apply the preprocessed of the training set to the testing set,
+### Out-of-sample error
+
+
+From above, we can see that the estimated out-of-sample error obtained by the random forest algorithm is 2.6. 
+In general cross-validation is not needed in the random forest, as this algorithm performs bootstrapping and resampling of the training data. In this case, cross-validation is necessary to avoid overfitting.
+
+We can cross-validate the results of the random forest algorithm by predicting the values of the *classe* variable in the testing set and generating a confusion matrix to obtain the error with our test set.
+
+Applying the preprocessed of the training set to the testing set,
 ```{r}
 #predicting new values with random forest
 testPC <- predict(preObj,testing[,-53])
-#confusion<-confusionMatrix(testing$classe,predict(modelFit,testPC))
-conf
+predictions <- predict(modelFit,testPC)
+#confusion<-confusionMatrix(testing$classe,predictions)
+#conf
 ```
 
-### Out-of-sample error
-The estimated out-of-sample error estimated by the random forest algorithm is
-```{r}
-#rf estimated error
-```
-
-
-In general cross-validation is not needed as random forest is a bootstrapping method with multiple samples
 
 ```{r}
-conf$overall[1][1]
+#confusion$overall[1]
 ```
+
 
 # References
 [1] Velloso, E.; Bulling, A.; Gellersen, H.; Ugulino, W.; Fuks, H. Qualitative Activity Recognition of Weight Lifting Exercises. Proceedings of 4th International Conference in Cooperation with SIGCHI (Augmented Human '13) . Stuttgart, Germany: ACM SIGCHI, 2013.
