@@ -5,7 +5,7 @@ date: "September 19, 2014"
 output: html_document
 ---
 # Summary
-For this project, data of 6 participants performing exercises in 6 different ways was provided [1]. The six participants performed barbell lifts correctly and incorrectly in 5 different ways, classified as: A, B, C, D, E. The goal of the project is to correctly predict what kind of activity it is being realized as described by the *classe* variable. Here, after initial preprocessing, discarding missing values, the training dataset was partitioned into a training and testing dataset. This training dataset was centered and scaled and principal component analysis was performed. Then a random forest approach was chosen and applied to the training dataset. With an estimated error rate of $2.6$%. This was cross-validated with the test set where we obtain an error rate of $2.4$%.
+For this project, data of 6 participants performing exercises in 6 different ways was provided [1]. The six participants performed barbell lifts correctly and incorrectly in 5 different ways, classified as: A, B, C, D, E. The goal of the project is to correctly predict what kind of activity it is being realized as described by the *classe* variable. Here, after initial preprocessing, discarding missing values, the training dataset was partitioned into a training and testing dataset. This training dataset was centered and scaled and principal component analysis was performed. Then a random forest approach was chosen and applied to the training dataset. With an estimated error rate of $2.6$%. This was cross-validated with the test set where we obtain an error rate of $2.27$%.
 
 # Analysis
 
@@ -85,7 +85,7 @@ preObj <- preProcess(training[,-53],method=c("center","scale","pca"))
 The preprocessed object is then feed into the train function to obtain our model
 ```{r}
 trainPC <- predict(preObj,training[,-53])
-#modelFit <- train(training$classe~., data=trainPC, method="rf")
+modelFit <- train(training$classe~., data=trainPC, method="rf")
 ```
 
 
@@ -107,13 +107,13 @@ Applying the preprocessed of the training set to the testing set,
 #predicting new values with random forest
 testPC <- predict(preObj,testing[,-53])
 predictions <- predict(modelFit,testPC)
-#confusion<-confusionMatrix(testing$classe,predictions)
+confusion<-confusionMatrix(testing$classe,predictions)
 #conf
 ```
 
 
 ```{r}
-#confusion$overall[1]
+confusion$overall[1]
 ```
 
 
