@@ -1,7 +1,7 @@
 predictionproject
 =================
 
-This repo contains the files needed for the Practical Machine Learning Course Project.
+This repository contains the files needed for the Practical Machine Learning Course Project.
 The files contained are the following:
 
 - README.md : this file.
